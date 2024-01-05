@@ -84,7 +84,7 @@ fn validate_file_name(users_input: &str, default_file_name: &str) -> String {
 }
 
 fn get_file_name(default_file_name: &str) -> String {
-    let file_name = String::from(ask_user(default_file_name));
+    let file_name = ask_user(default_file_name);
     if file_name.is_empty() {
         return String::new();
     }
@@ -116,6 +116,8 @@ fn open_file(output_dir: &str, file_name: &str) -> Result<()> {
     Command::new("open")
         .arg(format!("{}/{}.txt", output_dir, file_name))
         .spawn()?;
+
+    println!("File created successfully at {output_dir}/{file_name}.txt");
 
     Ok(())
 }
