@@ -1,16 +1,13 @@
-#![feature(fs_try_exists)]
-
 use chrono::prelude::*;
 use std::error;
-use std::fs::{File, try_exists};
+use std::fs::File;
 use std::io::prelude::*;
 use std::process::Command;
+use std::path::Path;
 
 const DEFAULT_OUTPUT_DIR: &'static str = include_str!("./constants.txt");
 
 type Result<T> = std::result::Result<T, Box<dyn error::Error>>;
-
-type IoResult<T> = std::result::Result<T, std::io::Error>;
 
 fn get_output_dir() -> String {
     let mut output_dir = String::new();
@@ -33,12 +30,11 @@ fn get_output_dir() -> String {
     }
 }
 
-fn file_exists(file_name: &str) -> IoResult<bool> {
-    match try_exists(format!("{DEFAULT_OUTPUT_DIR}/{file_name}.txt")) {
-        Ok(true) => Ok(true),
-        Ok(false) => Ok(false),
-        Err(e) => Err(e)
-    }
+fn file_exists(file_name: &str) -> bool {
+    let path = format!("{DEFAULT_OUTPUT_DIR}/{file_name}.txt");
+
+    let path = Path::new(&path);
+    path.exists()
 }
 
 fn ask_user(default_file_name: &str) -> String {
@@ -71,14 +67,13 @@ fn validate_file_name(users_input: &str, default_file_name: &str) -> String {
         }
 
         match file_exists(&file_name.to_string()) {
-            Ok(true) => {
+            true => {
                 println!("\nFile already exists on the specified dir! Try another name");
                 continue
             },
-            Ok(false) => { 
+            false => { 
                 break file_name.to_string()
             },
-            Err(e) => panic!("Error on checkin dir, {}", e),
         }
     }
 }
@@ -121,6 +116,7 @@ fn open_file(output_dir: &str, file_name: &str) -> Result<()> {
 
     Ok(())
 }
+
 fn update_output_dir(output_dir: &str) -> Result<()> {
     std::fs::write("./src/constants.txt", output_dir)?;
     Ok(())
