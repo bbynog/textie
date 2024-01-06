@@ -6,6 +6,8 @@ use std::process::Command;
 use std::path::Path;
 
 const DEFAULT_OUTPUT_DIR: &'static str = include_str!("./constants.txt");
+const PRETTY_TIME_FORMAT: &'static str = "%a - %d %b %Y - %T";
+const FILE_NAME_TIME_FORMAT: &'static str = "%d-%m-%Y_%H:%M:%S";
 
 type Result<T> = std::result::Result<T, Box<dyn error::Error>>;
 
@@ -114,7 +116,7 @@ fn get_file_name(default_file_name: &str) -> String {
 }
 
 fn create_and_write_file(file: &TextFile) -> Result<String> {
-    let current_time_formatted = Local::now().format("%a - %d %b %Y - %T");
+    let current_time_formatted = Local::now().format(PRETTY_TIME_FORMAT);
 
     let file_name;
     let txt_content = if file.name.users_input.is_empty() {
@@ -151,11 +153,11 @@ fn update_output_dir(output_dir: &str) -> Result<()> {
 fn main() -> Result<()> {
     let mut text_file = TextFile::build_file();
 
+    text_file.name.default = Local::now().format(FILE_NAME_TIME_FORMAT).to_string();
     text_file.dir = get_output_dir();
-    text_file.name.default = Local::now().format("%d-%m-%Y_%H:%M:%S").to_string();
     text_file.name.users_input = get_file_name(&text_file.name.default);
-    let file_name = create_and_write_file(&text_file)?;
 
+    let file_name = create_and_write_file(&text_file)?;
     println!("{:#?}", text_file);
 
     open_file(&text_file.dir, &file_name)?;
