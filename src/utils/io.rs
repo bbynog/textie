@@ -36,3 +36,12 @@ pub fn ask_user(default_file_name: &str) -> String {
 
     file_name.trim().to_string()
 }
+
+pub fn get_file_name(default_file_name: &str) -> String {
+    let file_name = ask_user(default_file_name);
+    if file_name.is_empty() {
+        return String::new();
+    }
+
+    file_system::validate_file_name(&file_name, default_file_name)
+}
