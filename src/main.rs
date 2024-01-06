@@ -9,6 +9,32 @@ const DEFAULT_OUTPUT_DIR: &'static str = include_str!("./constants.txt");
 
 type Result<T> = std::result::Result<T, Box<dyn error::Error>>;
 
+#[derive(Debug)]
+struct FileName {
+    default: String,
+    users_input: String
+}
+
+#[derive(Debug)]
+struct TextFile {
+    name: FileName,
+    dir: String,
+    content: String
+}
+
+impl TextFile {
+    fn build_file() -> TextFile{
+        TextFile {
+            name: FileName {
+                default: String::new(),
+                users_input: String::new(),
+            },
+            dir: String::new(),
+            content: String::new(),
+        }
+    }
+}
+
 fn get_output_dir() -> String {
     let mut output_dir = String::new();
 
@@ -87,20 +113,20 @@ fn get_file_name(default_file_name: &str) -> String {
     validate_file_name(&file_name, &default_file_name)
 }
 
-fn create_and_write_file(output_dir: &str, input_file_name: &str, default_file_name: &str, content: &str) -> Result<String> {
+fn create_and_write_file(file: &TextFile) -> Result<String> {
     let current_time_formatted = Local::now().format("%a - %d %b %Y - %T");
 
     let file_name;
-    let txt_content = if input_file_name.is_empty() {
-        file_name = String::from(format!("{}", default_file_name));
-        format!("{}\n{}\n", current_time_formatted, content)
+    let txt_content = if file.name.users_input.is_empty() {
+        file_name = String::from(format!("{}", file.name.default));
+        format!("{}\n{}\n", current_time_formatted, file.content)
     } else {
-        file_name = String::from(format!("{}", input_file_name));
-        format!("{} - {}\n{}\n", input_file_name, current_time_formatted, content)
+        file_name = String::from(format!("{}", file.name.users_input));
+        format!("{} - {}\n{}\n", file.name.users_input, current_time_formatted, file.content)
     };
     
     let mut text_file =
-        File::create(format!("{}/{}.txt", output_dir, file_name)).expect("Failed to create file");
+        File::create(format!("{}/{}.txt", file.dir, file_name)).expect("Failed to create file");
 
     text_file.write_all(txt_content.as_bytes())?;
 
@@ -123,13 +149,16 @@ fn update_output_dir(output_dir: &str) -> Result<()> {
 }
 
 fn main() -> Result<()> {
-    let output_dir = get_output_dir();
+    let mut text_file = TextFile::build_file();
 
-    let default_file_name = Local::now().format("%d-%m-%Y_%H:%M:%S").to_string();
-    let file_name = get_file_name(&default_file_name);
+    text_file.dir = get_output_dir();
+    text_file.name.default = Local::now().format("%d-%m-%Y_%H:%M:%S").to_string();
+    text_file.name.users_input = get_file_name(&text_file.name.default);
+    let file_name = create_and_write_file(&text_file)?;
 
-    let file_name = create_and_write_file(&output_dir, &file_name, &default_file_name, "")?;
-    open_file(&output_dir, &file_name)?;
+    println!("{:#?}", text_file);
+
+    open_file(&text_file.dir, &file_name)?;
 
     Ok(())
 }
