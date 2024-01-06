@@ -25,7 +25,7 @@ struct TextFile {
 }
 
 impl TextFile {
-    fn build_file() -> TextFile{
+    fn new() -> TextFile{
         TextFile {
             name: FileName {
                 default: String::new(),
@@ -151,7 +151,7 @@ fn update_output_dir(output_dir: &str) -> Result<()> {
 }
 
 fn main() -> Result<()> {
-    let mut text_file = TextFile::build_file();
+    let mut text_file = TextFile::new();
 
     text_file.name.default = Local::now().format(FILE_NAME_TIME_FORMAT).to_string();
     text_file.dir = get_output_dir();
