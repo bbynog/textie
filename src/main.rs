@@ -1,5 +1,11 @@
-use chrono::prelude::*;
-use std::error;
+use crate::prelude::*;
+
+mod error;
+mod prelude;
+mod utils;
+
+
+use chrono::prelude::Local;
 use std::fs::File;
 use std::io::prelude::*;
 use std::process::Command;
@@ -8,8 +14,6 @@ use std::path::Path;
 const DEFAULT_OUTPUT_DIR: &'static str = include_str!("./constants.txt");
 const PRETTY_TIME_FORMAT: &'static str = "%a - %d %b %Y - %T";
 const FILE_NAME_TIME_FORMAT: &'static str = "%d-%m-%Y_%H:%M:%S";
-
-type Result<T> = std::result::Result<T, Box<dyn error::Error>>;
 
 #[derive(Debug)]
 struct FileName {
